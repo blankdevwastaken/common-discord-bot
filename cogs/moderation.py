@@ -174,8 +174,10 @@ class Moderation(commands.Cog):
     ) -> None:
         await interaction.response.defer(ephemeral=True)
 
-        check = (lambda m: m.author == member) if member else None
-        deleted = await interaction.channel.purge(limit=amount, check=check)
+        if member:
+            deleted = await interaction.channel.purge(limit=amount, check=lambda m: m.author == member)
+        else:
+            deleted = await interaction.channel.purge(limit=amount)
 
         desc = f"Deleted **{len(deleted)}** message(s)"
         if member:
