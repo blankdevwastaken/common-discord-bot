@@ -13,7 +13,7 @@ discord-bot/
 ├── cogs/                   # Feature modules (auto-loaded on startup)
 │   ├── general.py          # /ping /help /info /uptime /avatar /serverinfo
 │   ├── moderation.py       # /kick /ban /unban /timeout /purge /warn /warnings
-│   ├── admin.py            # /reload /sync /status /announce /listcogs
+│   ├── admin.py            # /reload /sync /status /listcogs
 │   └── error_handler.py    # Global slash-command error handling
 │
 ├── utils/
