@@ -8,7 +8,7 @@ class ActiveMember(commands.Cog):
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-    # ── Active Member Tracking ────────────────────────────────────────────────
+    # ── Active Member Tracking and checks if prestige is present and then applies it. 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         with open("data/data.json5", "r") as f:
@@ -28,7 +28,7 @@ class ActiveMember(commands.Cog):
             data[user_id]["messages"] += prestige_multiplier
         with open("data/data.json5", "w") as f:
             json.dump(data, f, indent=4)
-
+    # Pulls the top 10 people with the most messages
     @commands.hybrid_command(name="leaderboard")
     async def leaderboard(self, ctx: commands.Context):
         with open("data/data.json5", "r") as f:
@@ -41,6 +41,7 @@ class ActiveMember(commands.Cog):
             leaderboard_text += f"{index}. <@{user_id}> - {user_data['messages']} messages\n"
         
         await ctx.send(leaderboard_text)
+    # Lets the user check their messages via pulling the data from the DB/json
     @commands.hybrid_command(name="mymessages", aliases=["level", "stats", "messages"])
     async def mymessages(self, ctx: commands.Context):
         with open("data/data.json5", "r") as f:
@@ -50,6 +51,8 @@ class ActiveMember(commands.Cog):
         messages = data.get(user_id, {}).get("messages", 0)
         
         await ctx.send(f"{ctx.author.mention}, you have sent {messages} messages!")
+        
+    # force resets a members messages 
     @commands.hybrid_command(name="resetmessages")
     @check.is_mod
     async def resetmessages(self, ctx: commands.Context, member: discord.Member):
@@ -66,6 +69,7 @@ class ActiveMember(commands.Cog):
             await ctx.send(f"{member.mention}'s message count has been reset.")
         else:
             await ctx.send(f"{member.mention} has no recorded messages.")
+    # Resets the users message count and adds a prestige level 
     @commands.hybrid_command(name="prestige")
     async def prestige(self, ctx: commands.Context):
         with open("data/data.json5", "r") as f:
