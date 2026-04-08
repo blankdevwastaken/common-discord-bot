@@ -35,6 +35,8 @@ class Bot(commands.Bot):
             "cogs.moderation",
             "cogs.admin",
             "cogs.error_handler",
+            "cogs.activemember",
+            "cogs.ai",
         ]
 
     #

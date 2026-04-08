@@ -6,7 +6,7 @@ load_dotenv()
 class Config:
     # ── Required ──────────────────────────────────────────────────────────────
     TOKEN: str = os.getenv("DISCORD_TOKEN", "")
-
+    GROQ_API_KEY str = os.getenv("GROQ_API_KEY", "")
     # ── Optional / Defaults ───────────────────────────────────────────────────
     PREFIX: str = os.getenv("PREFIX", "!")
 

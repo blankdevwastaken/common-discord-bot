@@ -87,3 +87,7 @@ class ActiveMember(commands.Cog):
             await ctx.send(f"{ctx.author.mention}, you have prestiged! Your message count has been reset and you have a 1.5x prestige multiplier for the next 500 messages. You have prestiged {data[user_id]['prestige_count']} times.")
         else:
             await ctx.send(f"{ctx.author.mention}, you need at least 500 messages to prestige. You currently have {messages} messages.")
+        
+        
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(ActiveMember(bot))
