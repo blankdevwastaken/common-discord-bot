@@ -3,10 +3,13 @@ Admin commands — restricted to bot admins / server admins.
 These commands help you manage the bot itself at runtime.
 """
 
+import datetime
+
 import discord
 from discord import app_commands, Interaction
 from discord.ext import commands
-
+import json5
+import utils.checks
 import utils.embeds as em
 from utils.checks import bot_admin_only
 from utils.logger import setup_logger
@@ -92,6 +95,68 @@ class Admin(commands.Cog):
         )
 
     # ── /listcogs ──────────────────────────────────────────────────────────────
+
+    @app_commands.command(name="warn", description="Warn a user and log the offense.")
+    @bot_admin_only()
+    async def warn(self, interaction: Interaction, user: discord.Member, *, reason: str = "No reason provided"):
+        with open("data/data.json5", "r") as f:
+            data = json5.load(f)
+        user_data = data.get(str(user.id), {"offenses": [], "offense_count": 0})
+        user_data["offense_count"] += 1 
+        user_data["offenses"].append({
+            "reason": reason,
+            "date": datetime.utcnow().isoformat() + "Z"
+        })
+        data[str(user.id)] = user_data
+        with open("data/data.json5", "w") as f:
+            json5.dump(data, f)
+        
+        if user_data["offense_count"] == 3:
+            try:
+                await user.send(
+                    embed=em.error(
+                        "You Have Been Muted",
+                        f"You have been muted in **{interaction.guild.name}** for 10 minutes due to reaching 3 warnings.\n\n**Reason:** {reason}"
+                    )
+                )
+            except discord.Forbidden:
+                logger.warning(f"Could not DM {user} about their mute.")
+            await interaction.guild.timeout(user, duration=datetime.timedelta(minutes=10), reason="Reached 3 warnings: " + reason)
+            await interaction.response.send_message(
+                embed=em.error("User Muted", f"{user.mention} has been muted for 10 minutes (3 warnings).")
+            )
+        elif user_data["offense_count"] == 5:
+            try:
+                await user.send(
+                    embed=em.error(
+                        "You Have Been Muted",
+                        f"You have been muted in **{interaction.guild.name}** for 1 hour due to reaching 5 warnings.\n\n**Reason:** {reason}"
+                    )
+                )
+            except discord.Forbidden:
+                logger.warning(f"Could not DM {user} about their mute.")
+            await interaction.guild.timeout(user, duration=datetime.timedelta(hours=1), reason="Reached 5 warnings: " + reason)
+            await interaction.response.send_message(
+                embed=em.error("User Muted", f"{user.mention} has been muted for 1 hour (5 warnings).")
+            )
+        elif user_data["offense_count"] >= 10:
+            try:
+                await user.send(
+                    embed=em.error(
+                        "You Have Been Banned",
+                        f"You have been banned from **{interaction.guild.name}** due to reaching 10 warnings.\n\n**Reason:** {reason}"
+                    )
+                )
+            except discord.Forbidden:
+                logger.warning(f"Could not DM {user} about their ban.")
+            await interaction.guild.ban(user, reason="Reached 10 warnings: " + reason)
+            await interaction.response.send_message(
+                embed=em.error("User Banned", f"{user.mention} has been banned (10 warnings).")
+            )
+        else:
+            await interaction.response.send_message(
+                embed=em.success("User Warned", f"{user.mention} has been warned. Total offenses: {user_data['offense_count']}.")
+            )
 
     @app_commands.command(name="listcogs", description="List all loaded extensions (cogs).")
     @bot_admin_only()

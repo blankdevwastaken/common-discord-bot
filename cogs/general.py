@@ -72,6 +72,14 @@ class General(commands.Cog):
             ),
             inline=False,
         )
+        embed.add_field(
+            name="📊  Level System",
+            value=(
+                "`/leaderboard` — View the active member leaderboard\n"
+                "`/level` — Check your message count\n"
+            ),
+            inline=False,
+        )
         embed.set_footer(text=f"Requested by {interaction.user}", icon_url=interaction.user.display_avatar.url)
         await interaction.response.send_message(embed=embed)
 

@@ -8,7 +8,7 @@ from pathlib import Path
 
 from config import Config
 from utils.logger import setup_logger
-
+import os 
 # ─── Setup ───────────────────────────────────────────────────────────────────
 
 logger = setup_logger("bot")
@@ -37,19 +37,19 @@ class Bot(commands.Bot):
             "cogs.error_handler",
         ]
 
-    # ── Lifecycle ─────────────────────────────────────────────────────────────
+    #
 
     async def setup_hook(self) -> None:
-        """Called before the bot connects to Discord. Load cogs and sync tree."""
         logger.info("Loading extensions…")
-        for ext in self.initial_extensions:
-            try:
-                await self.load_extension(ext)
-                logger.info(f"  ✓ Loaded {ext}")
-            except Exception as e:
-                logger.error(f"  ✗ Failed to load {ext}: {e}", exc_info=True)
+        for cog in os.listdir("./cogs"):
+            if cog.endswith(".py"):
+                extension = f"cogs.{cog[:-3]}"
+                try:
+                    await self.load_extension(extension)
+                    logger.info(f"Loaded extension: {extension}")
+                except Exception as e:
+                    logger.error(f"Failed to load extension {extension}: {e}")
 
-        # Sync slash commands globally (or to a test guild for faster updates)
         if Config.TEST_GUILD_ID:
             guild = discord.Object(id=Config.TEST_GUILD_ID)
             self.tree.copy_global_to(guild=guild)
